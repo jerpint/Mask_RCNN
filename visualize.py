@@ -75,7 +75,8 @@ def apply_mask(image, mask, color, alpha=0.5):
 
 def display_instances(image, boxes, masks, class_ids, class_names,
                       scores=None, title="",
-                      figsize=(16, 16), ax=None):
+                      figsize=(16, 16), ax=None,
+                      display_box=True, preview=True, save_dir=None):
     """
     boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
     masks: [height, width, num_instances]
@@ -109,6 +110,8 @@ def display_instances(image, boxes, masks, class_ids, class_names,
         color = colors[i]
 
         # Bounding box
+
+
         if not np.any(boxes[i]):
             # Skip this instance. Has no bbox. Likely lost in image cropping.
             continue
@@ -116,7 +119,9 @@ def display_instances(image, boxes, masks, class_ids, class_names,
         p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
                               alpha=0.7, linestyle="dashed",
                               edgecolor=color, facecolor='none')
-        ax.add_patch(p)
+        if display_box:
+
+            ax.add_patch(p)
 
         # Label
         class_id = class_ids[i]
@@ -142,9 +147,16 @@ def display_instances(image, boxes, masks, class_ids, class_names,
             verts = np.fliplr(verts) - 1
             p = Polygon(verts, facecolor="none", edgecolor=color)
             ax.add_patch(p)
+
     ax.imshow(masked_image.astype(np.uint8))
-    plt.show()
-    
+
+    if save_dir:
+        plt.savefig(save_dir)
+        plt.close()
+    elif preview:
+        pass
+    else:
+        plt.close()
 
 def draw_rois(image, rois, refined_rois, mask, class_ids, class_names, limit=10):
     """
